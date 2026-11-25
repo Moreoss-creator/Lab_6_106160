@@ -1,7 +1,7 @@
 ![Flutter CI](https://github.com/Moreoss-creator/Lab_6_106160/actions/workflows/flutter_ci.yml/badge.svg)
 # hotel_reservation_app
 
-A new Flutter project.
+An app that use to book a hotel room based on the user preferences
 
 ## Getting Started
 
