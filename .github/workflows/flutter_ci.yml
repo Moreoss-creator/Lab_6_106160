@@ -1,0 +1,39 @@
+name: Flutter CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      MIN_COVERAGE: 60
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: flutter pub get
+      - run: flutter test --coverage
+
+      - name: Enforce coverage threshold
+        run: |
+          PCT=$(awk -F: '/^LF:/{t+=$2} /^LH:/{h+=$2}
+            END{printf "%.1f", h*100/t}' coverage/lcov.info)
+          echo "Line coverage: $PCT% (min $MIN_COVERAGE%)"
+          awk -v p="$PCT" -v m="$MIN_COVERAGE" \
+            'BEGIN{exit !(p+0 >= m+0)}'
+
+      - name: Build HTML report
+        if: always()
+        run: |
+          sudo apt-get update && sudo apt-get install -y lcov
+          genhtml coverage/lcov.info -o coverage/html
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
